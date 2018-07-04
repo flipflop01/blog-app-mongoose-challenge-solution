@@ -11,7 +11,7 @@ const {TEST_DATABASE_URL} =	require('../config');
 
 chai.use(chaiHttp);
 
-function seedBlogData() {
+/*function seedBlogData() {
 	const seedData = []; 
 
 	for (let i=1; i<=5; i++) {
@@ -34,11 +34,29 @@ function generateBlogData() {
 function generateTitle() {
 	const title = ['Me and Only Me', '1983', 'A Catcher in the Sourdough', 'Narcos', "Moby Shark" ];
 	return title[Math.floor(Math.random() * title.length)];
+}*/
+
+function seedBlogPostData() {
+  console.info('seed blog data');
+  const seedData = [];
+  for (let i = 1; i <= 10; i++) {
+    seedData.push({
+      author: {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName()
+      },
+      title: faker.lorem.sentence(),
+      content: faker.lorem.text()
+    });
+  }
+  return BlogPost.insertMany(seedData);
 }
+
 
 function tearDownDb() {
 	return mongoose.connection.dropDatabase();
 }
+
 
 describe('Blogs API Resource', function() {
 
@@ -47,7 +65,7 @@ describe('Blogs API Resource', function() {
 	});
 
 	beforeEach(function() {
-		return seedBlogData();
+		return seedBlogPostData();
 	});
 
 	afterEach(function() {
@@ -63,8 +81,8 @@ describe('Blogs API Resource', function() {
 		it('should return all blogs', function() {
 			let res;
 			return chai.request(app)
-				.get('/blogs')
-				.then(function(_res) {
+				.get('/posts')
+				.then(_res => {
 					res = _res;
 					res.should.have.status(200);
 					res.body.should.have.lengthOf.at.least(1);
@@ -76,12 +94,12 @@ describe('Blogs API Resource', function() {
 		});
 		it('should return posts with correct fields', function() {
 			let respost;
-			return chai.request.(app)
+			return chai.request(app)
 			.get('/posts')
 			.then(function(res) {
 				res.should.have.status(200);
 				res.should.be.json;
-				res.should.be.a.('array');
+				res.should.be.a('array');
 				res.body.should.have.lengthOf.at.least(1)
 
 				res.body.forEach(function(post) {
